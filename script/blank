@@ -1,0 +1,37 @@
+
+
+buttons: [{
+          className: 'btn btn-primary ms-2',
+          text: 'All',
+          action: function (e, dt, node, config) { _status = 'ALL'; _table.ajax.reload(); }
+        },{
+          className: 'btn btn-primary',
+          text: 'Active',
+          action: function (e, dt, node, config) { _status = '1'; _table.ajax.reload(); }
+        },{
+          className: 'btn btn-primary',
+          text: 'Delete',
+          action: function (e, dt, node, config) { _status = '0'; _table.ajax.reload(); }
+        },
+        {
+          extend: 'collection',
+          className: 'dropdown-toggle btn btn-label-secondary shadow-none',
+          text: '<i class="bx me-2"></i> Member',
+          buttons: [
+            { text: 'ALL', action: function (e, dt, node, config) { _num_code = 'ALL'; _table.ajax.reload(); } },
+            { text: 'Normal', action: function (e, dt, node, config) { _num_code = 'Normal'; _table.ajax.reload(); } },
+            { text: 'VIP', action: function (e, dt, node, config) { _num_code = 'VIP'; _table.ajax.reload(); }},
+            { text: 'Farmily', action: function (e, dt, node, config) { _num_code = 'Farmily'; _table.ajax.reload(); } }, 
+          ]
+        },{
+          extend: 'collection',
+          className: 'dropdown-toggle btn btn-label-secondary shadow-none',
+          text: '<i class="bx bx-export me-2"></i>Export',
+          buttons: [
+            { extend: 'print', text: '<i class="bx bx-printer me-2"></i>Print', className: "dropdown-item", exportOptions: {columns:[0,2,3,4,5,6,7]} },
+            { extend: 'excelHtml5', text: '<i class="bx bx-file me-2"></i>Excel', className: "dropdown-item", exportOptions: {columns:[0,2,3,4,5,6,7]} },
+            { extend: 'copyHtml5', text: '<i class="bx bx-copy me-2"></i>Copy', className: "dropdown-item", exportOptions: {columns:[0,2,3,4,5,6,7]} },
+            { extend: 'colvis', text: '<i class="bx bx-grid me-2"></i>Column', className: "dropdown-item" },
+          ]
+        },
+      ], 

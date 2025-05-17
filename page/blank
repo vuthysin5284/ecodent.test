@@ -1,0 +1,142 @@
+let _medicalHistoryTable = null;
+
+$(document).ready(function () {
+  getMedicalHistoryTable();
+
+  // Open modal for new record
+  $("#createHistory").on("click", function () {
+    clearMedicalHistoryForm();
+    $("#modalTitle").text("Add Medical History");
+    $("#medicalHistoryModal").modal("show");
+  });
+
+  // Submit add/edit
+  $(document).on("submit", "#medicalHistoryForm", function (e) {
+    e.preventDefault();
+    let formData = $(this).serialize();
+    let action = $("#historyId").val() ? "update" : "create";
+    formData += "&action=" + action;
+    $.ajax({
+      url: "../api/medical-history.php",
+      type: "POST",
+      data: formData,
+      dataType: "json",
+      success: function (data) {
+        if (data.success) {
+          $("#medicalHistoryModal").modal("hide");
+          $("#medicalHistoryTable").DataTable().ajax.reload();
+          alertText("Medical history saved!", "primary");
+        } else {
+          alert(data.message || "Failed");
+        }
+      },
+    });
+  });
+
+  // Edit
+  $("#medicalHistoryTable").on("click", ".editHistoryBtn", function () {
+    var id = $(this).data("id");
+    $.ajax({
+      url: "../api/medical-history.php",
+      data: { action: "get", id: id },
+      type: "GET",
+      dataType: "json",
+      success: function (data) {
+        if (data.success) {
+          var h = data.history;
+          $("#historyId").val(h.id);
+          $("#patientId").val(h.patient_id);
+          $("#date").val(h.date);
+          $("#condition").val(h.condition);
+          $("#allergies").val(h.allergies);
+          $("#medications").val(h.medications);
+          $("#notes").val(h.notes);
+          $("#modalTitle").text("Edit Medical History");
+          $("#medicalHistoryModal").modal("show");
+        } else {
+          alert(data.message || "Failed to load record");
+        }
+      },
+    });
+  });
+
+  // Delete
+  $("#medicalHistoryTable").on("click", ".deleteHistoryBtn", function () {
+    var id = $(this).data("id");
+    if (confirm("Are you sure want to delete this record?")) {
+      $.ajax({
+        url: "../api/medical-history.php",
+        data: { action: "delete", id: id },
+        type: "POST",
+        dataType: "json",
+        success: function (data) {
+          if (data.success) {
+            $("#medicalHistoryTable").DataTable().ajax.reload();
+            alertText("Medical history deleted!", "primary");
+          } else {
+            alert(data.message || "Failed");
+          }
+        },
+      });
+    }
+  });
+});
+
+// DataTable initialization
+function getMedicalHistoryTable() {
+  _medicalHistoryTable = $("#medicalHistoryTable").DataTable({
+    dom: '<"d-flex justify-content-between px-6"<"d-flex justify-content-start justify-content-md-end align-items-baseline mb-0"<"dt-action-buttons d-flex align-items-start align-items-md-center justify-content-sm-center mb-0"lB>><""f>>t<"row mx-2"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+    language: {
+      sLengthMenu: "_MENU_",
+      search: "",
+      searchPlaceholder: "Search",
+    },
+    pageLength: 25,
+    serverSide: false,
+    processing: true,
+    searching: true,
+    paging: true,
+    order: [],
+    ajax: {
+      url: "../api/medical-history.php",
+      type: "GET",
+      data: { action: "list" },
+      dataSrc: function (json) {
+        return json.histories || [];
+      },
+    },
+    columns: [
+      { data: "id" },
+      { data: "patient_name" },
+      { data: "date" },
+      { data: "condition" },
+      { data: "allergies" },
+      { data: "medications" },
+      { data: "notes" },
+      {
+        data: null,
+        orderable: false,
+        render: function (data, type, row) {
+          return (
+            '<button class="btn btn-sm btn-primary editHistoryBtn" data-id="' +
+            row.id +
+            '"><i class="bx bx-edit-alt"></i></button> ' +
+            '<button class="btn btn-sm btn-danger deleteHistoryBtn" data-id="' +
+            row.id +
+            '"><i class="bx bx-trash"></i></button>'
+          );
+        },
+      },
+    ],
+  });
+}
+
+function clearMedicalHistoryForm() {
+  $("#medicalHistoryForm")[0].reset();
+  $("#historyId").val("");
+}
+
+function alertText(text, type) {
+  // Replace with your own notification/toast system if needed
+  alert(text);
+}

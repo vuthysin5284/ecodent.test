@@ -1,0 +1,6 @@
+user_add_perm :Mediumtext
+user_edit_perm : Mediumtext
+user_delete_perm : Mediumtext
+
+system_id : varchar 11
+parent_id : int

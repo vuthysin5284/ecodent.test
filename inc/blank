@@ -1,0 +1,67 @@
+<!-- Old Navigation Menu-->
+<ul id="navigation-menu" class="menu-inner py-1">
+      <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">navigation menu</span>
+      </li>
+      <?php
+        include_once ('config.php');
+        $uid = $_SESSION['uid'];
+		    $permission = $_SESSION['USER_PERMISSION'];
+		    $permissions = explode(', ', $permission);
+        $o = '';
+        foreach($permissions as $p){
+          $R = mysqli_fetch_assoc(mysqli_query($CON, "SELECT `menu_id` FROM `tbl_submenu` WHERE `id` = '$p' LIMIT 1"));
+          $menus[$p] = $R['menu_id'];
+        }
+        $lang = $_SESSION['lang'];
+        foreach($menus as $sm => $m){
+          $ROW = mysqli_fetch_assoc(mysqli_query($CON, "SELECT `sm`.`id`, `menu_name`, `menu_kh`, `menu_icon`, `menu_id`, `sub_menu_name`, `sub_menu_kh`, `sub_menu_link`,`pages` FROM `tbl_menu` AS `m` INNER JOIN `tbl_submenu` AS `sm` ON (`sm`.`menu_id` = `m`.`id`) WHERE `menu_id` = '$m' AND `sm`.`id` = '$sm' ORDER BY `menu_order`, `sub_menu_order` ASC"));
+          $start_noti_date = date('Y-m-d').' 00:00:00';
+          $end_noti_date = date('Y-m-d').' 23:59:59';
+          $sub_id = $ROW['id'];
+          $badge_menu = 'badge-'.strtolower(str_replace(' ', '-', $ROW['menu_name']));
+          $badge_submenu = 'badge-'.strtolower(str_replace(' ', '-', $ROW['sub_menu_name']));
+          if ($tmp != $ROW['menu_id']) {
+            if($tmp != 0) { $o .= '</ul>'; }
+            if ($lang == 1) {
+              $menu = $ROW['menu_name'];
+              $sub_menu = $ROW['sub_menu_name'];
+            } else {
+              $menu = $ROW['menu_kh'];
+              $sub_menu = $ROW['sub_menu_kh'];
+            }
+            $tmp = $ROW['menu_id'];
+            $o .= '<li id="'.$ROW['menu_name'].'" class="menu-item">';
+            $o .= '<a href="javascript:void(0);" class="menu-link menu-toggle">';
+            $o .= '<i class="menu-icon '.$ROW['menu_icon'].'"></i>';
+            $o .= '<div>'.$menu.'</div>';
+            $o .= '<div class="badge bg-danger rounded-pill ms-auto" id="'.$badge_menu.'"></div>';
+            $o .= '</a>';
+            $o .= '<ul class="menu-sub">';
+            $o .= '<li id="'.$ROW['sub_menu_name'].'" class="menu-item">';
+            $o .= '<a href="../'.$ROW['pages'].'/'.$ROW['sub_menu_link'].'" class="menu-link">';
+            $o .= '<div>'.$sub_menu.'</div>';
+            $o .= '<div class="badge bg-danger rounded-pill ms-auto" id="'.$badge_submenu.'"></div>';
+            $o .= '</a>';
+            $o .= '</li>';
+          } else {
+            if ($lang == 1) {
+              $menu = $ROW['menu_name'];
+              $sub_menu = $ROW['sub_menu_name'];
+            } else {
+              $menu = $ROW['menu_kh'];
+              $sub_menu = $ROW['sub_menu_kh'];
+            }
+            $o .= '<li id="'.$ROW['sub_menu_name'].'" class="menu-item">';
+            $o .= '<a href="../'.$ROW['pages'].'/'.$ROW['sub_menu_link'].'" class="menu-link">';
+            $o .= '<div data-i18n="Blank">'.$sub_menu.'</div>';
+            $o .= '<div class="badge bg-danger rounded-pill ms-auto" id="'.$badge_submenu.'"></div>';
+            $o .= '</a>';
+            $o .= '</li>';
+          }
+        }
+        $o .= '</ul>';
+        $o .= '</li>';
+        echo $o;
+      ?>
+    </ul>
